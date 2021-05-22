@@ -7,9 +7,9 @@ LDFLAGS += -lm
 
 include_dirs = ./include
 
-CXXFLAGS += $(addprefix -I,$(include_dirs)) -Wno-unused-local-typedef
+CXXFLAGS += $(addprefix -I,$(include_dirs))
 CXXFLAGS += -fPIC
-cpp_files = $(shell $(FIND) src/lib -name "*.cpp" -print | rev | cut -d"/" -f1 | rev)
+cpp_files = $(shell $(FIND) src/lib -name "*.cpp" -print | cut -c 9-)
 cxx_obj_files = $(subst .cpp,.o,$(cpp_files))
 
 objs = $(addprefix build/lib/,$(cxx_obj_files))

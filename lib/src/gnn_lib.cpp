@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <signal.h>
+typedef unsigned int uint;
 
 int Init(const int argc, const char **argv)
 {

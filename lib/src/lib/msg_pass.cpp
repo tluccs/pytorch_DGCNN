@@ -1,5 +1,5 @@
 #include "msg_pass.h"
-
+typedef unsigned int uint;
 void n2n_construct(GraphStruct* graph, long long* idxes, Dtype* vals)
 {
     int nnz = 0;    
