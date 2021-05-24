@@ -15,6 +15,7 @@ from DGCNN_embedding import DGCNN
 from mlp_dropout import MLPClassifier, MLPRegression
 from sklearn import metrics
 from util import cmd_args, load_data
+import matplotlib.pyplot as plt
 
 class Classifier(nn.Module):
     def __init__(self, regression=False):
@@ -211,26 +212,52 @@ if __name__ == '__main__':
 
     train_idxes = list(range(len(train_graphs)))
     best_loss = None
-    for epoch in range(cmd_args.num_epochs):
-        random.shuffle(train_idxes)
-        classifier.train()
-        avg_loss = loop_dataset(train_graphs, classifier, train_idxes, optimizer=optimizer)
-        if not cmd_args.printAUC:
-            avg_loss[2] = 0.0
-        print('\033[92maverage training of epoch %d: loss %.5f acc %.5f auc %.5f\033[0m' % (epoch, avg_loss[0], avg_loss[1], avg_loss[2]))
+    #Old: filename = cmd_args.data + '_acc_results.txt'
+    testname = 'results/sample_plot' #CHANGE THIS LINE!!!
+    filename = testname + "_acc_results.txt" 
+    #these vars hold loss/acc each epoch
+    train_loss_per_epoch = []
+    train_acc_per_epoch = []
+    test_loss_per_epoch = []
+    test_acc_per_epoch = []
+    with open(filename, 'a+') as f:
+        for epoch in range(cmd_args.num_epochs):
+            random.shuffle(train_idxes)
+            classifier.train()
+            avg_loss = loop_dataset(train_graphs, classifier, train_idxes, optimizer=optimizer)
+            if not cmd_args.printAUC:
+                avg_loss[2] = 0.0
+            print('\033[92maverage training of epoch %d: loss %.5f acc %.5f auc %.5f\033[0m' % (epoch, avg_loss[0], avg_loss[1], avg_loss[2]))
+            f.write('average training of epoch {}: loss {:.5f} acc {:.5f} auc {:.5f}\n'.format(epoch, avg_loss[0], avg_loss[1], avg_loss[2]))
 
-        classifier.eval()
-        test_loss = loop_dataset(test_graphs, classifier, list(range(len(test_graphs))))
-        if not cmd_args.printAUC:
-            test_loss[2] = 0.0
-        print('\033[93maverage test of epoch %d: loss %.5f acc %.5f auc %.5f\033[0m' % (epoch, test_loss[0], test_loss[1], test_loss[2]))
+            classifier.eval()
+            test_loss = loop_dataset(test_graphs, classifier, list(range(len(test_graphs))))
+            if not cmd_args.printAUC:
+                test_loss[2] = 0.0
+            print('\033[93maverage test of epoch %d: loss %.5f acc %.5f auc %.5f\033[0m' % (epoch, test_loss[0], test_loss[1], test_loss[2]))
+            f.write('average test of epoch {}: loss {:.5f} acc {:.5f} auc {:.5f}\n'.format(epoch, test_loss[0], test_loss[1], test_loss[2]))
+            train_loss_per_epoch.append(avg_loss[0])
+            train_acc_per_epoch.append(avg_loss[1])
+            test_loss_per_epoch.append(test_loss[0])
+            test_acc_per_epoch.append(test_loss[1])
+    
+    #plot loss
+    X = range(len(train_loss_per_epoch))
+    plt.plot(X, train_loss_per_epoch, label="train loss")
+    plt.plot(X, test_loss_per_epoch, label="test loss")
+    plt.title(testname + " loss curve")
+    plt.legend()
+    plt.savefig(testname + "_loss.jpg")
+    plt.show()
 
-    with open(cmd_args.data + '_acc_results.txt', 'a+') as f:
-        f.write(str(test_loss[1]) + '\n')
+    #plot acc
+    plt.plot(X, train_acc_per_epoch, label="train acc")
+    plt.plot(X, test_acc_per_epoch, label="test acc")
+    plt.title(testname + " acc curve")
+    plt.legend()
+    plt.savefig(testname + "_acc.jpg")
+    plt.show()
 
-    if cmd_args.printAUC:
-        with open(cmd_args.data + '_auc_results.txt', 'a+') as f:
-            f.write(str(test_loss[2]) + '\n')
 
     if cmd_args.extract_features:
         features, labels = classifier.output_features(train_graphs)
