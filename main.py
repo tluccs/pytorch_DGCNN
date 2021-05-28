@@ -16,6 +16,7 @@ from mlp_dropout import MLPClassifier, MLPRegression
 from sklearn import metrics
 from util import cmd_args, load_data
 import matplotlib.pyplot as plt
+import datetime
 
 class Classifier(nn.Module):
     def __init__(self, regression=False):
@@ -28,8 +29,9 @@ class Classifier(nn.Module):
             sys.exit()
 
         if cmd_args.gm == 'DGCNN':
+            # output_dim can also be changed
             self.gnn = model(latent_dim=cmd_args.latent_dim,
-                            output_dim=cmd_args.out_dim,
+                            output_dim=cmd_args.out_dim, 
                             num_node_feats=cmd_args.feat_dim+cmd_args.attr_dim,
                             num_edge_feats=cmd_args.edge_feat_dim,
                             k=cmd_args.sortpooling_k, 
@@ -38,11 +40,48 @@ class Classifier(nn.Module):
         if out_dim == 0:
             if cmd_args.gm == 'DGCNN':
                 out_dim = self.gnn.dense_dim
+                print("1. out_dim = ", out_dim) 
             else:
                 out_dim = cmd_args.latent_dim
+                print("2. out_dim = ", out_dim)
+        
+
+        # current variable values
+        # out_dim 160        
+        # hidden = 128    
+
+        # Potential parts to explore
+        # 1st) Change the droput percentage in mpl_dropout....py 
+        # 2nd) chagne hidden size without regression, and hidden size with regression
+        # 3rd) Test 1st and 2nd together
+
         self.mlp = MLPClassifier(input_size=out_dim, hidden_size=cmd_args.hidden, num_class=cmd_args.num_class, with_dropout=cmd_args.dropout)
+
+        if not regression:
+            print("RUNNING MLPClassifier")
+            
         if regression:
+            print("RUNNING REGRESSION")
+            # note: out_dim is a dimension that reaches a multiplication. If both not changed, we get this error:
+            #   File "/home/jessi/anaconda3/lib/python3.8/site-packages/torch/nn/functional.py", line 1753, in linear
+            #   return torch._C._nn.linear(input, weight, bias)
+            #   RuntimeError: mat1 and mat2 shapes cannot be multiplied (1x160 and 115x128)
             self.mlp = MLPRegression(input_size=out_dim, hidden_size=cmd_args.hidden, with_dropout=cmd_args.dropout)
+            
+            """
+            # cannot be done here since it is only being set, not called or started 
+            outdim_list = [] 
+            hiddensize_list = [108, 118, 128, 148, 168]
+            withdropout_list = [True, False] # percentages changed in mlp_dropout.py
+
+            for i, in outdim_list:
+                for j in hiddensize_list:
+                    for k in withdropout_list:
+                        print("Running: input size=", outdim_list[i], " hidden size=", hiddensize_list[j], " withdropout= ", withdropout_list[k])
+                        self.mlp = MLPRegression(input_size=outdim_list[i], hidden_size= hiddensize_list[j], with_dropout=cmd_args.dropout) # with_dropout=withdropout_list[k]) 
+            """
+                    
+            # save results in main
 
     def PrepareFeatureLabel(self, batch_graph):
         if self.regression:
@@ -182,7 +221,7 @@ def loop_dataset(g_list, classifier, sample_idxes, optimizer=None, bsize=cmd_arg
         all_targets = np.array(all_targets)
         fpr, tpr, _ = metrics.roc_curve(all_targets, all_scores, pos_label=1)
         auc = metrics.auc(fpr, tpr)
-        avg_loss = np.concatenate((avg_loss, [auc]))
+        avg_loss = np.concatenate((avg_loss, [auc])) # concatenates a row to a matrix that already exists
     else:
         avg_loss = np.concatenate((avg_loss, [0.0]))
     
@@ -203,24 +242,54 @@ if __name__ == '__main__':
         cmd_args.sortpooling_k = num_nodes_list[int(math.ceil(cmd_args.sortpooling_k * len(num_nodes_list))) - 1]
         cmd_args.sortpooling_k = max(10, cmd_args.sortpooling_k)
         print('k used in SortPooling is: ' + str(cmd_args.sortpooling_k))
+        print("cmd_args.hidden "+ str(cmd_args.hidden))
+        print("**input_size " + str(cmd_args.out_dim) + " hidden_size " + str(cmd_args.hidden) + " num_class " + str(cmd_args.num_class) + " with_dropout " + str(cmd_args.dropout))
+        print("Learning rate ",cmd_args.learning_rate)
 
     classifier = Classifier()
     if cmd_args.mode == 'gpu':
         classifier = classifier.cuda()
+    print("Classifier is " + str(Classifier))
 
-    optimizer = optim.Adam(classifier.parameters(), lr=cmd_args.learning_rate)
+     
+    # **Comment while runnin SGD**
+    #optimizer = optim.Adam(classifier.parameters(), lr=cmd_args.learning_rate)
+    
+    """
+    Optimizer runs: results in \results\OptimizerResults        
+    SGD signature torch.optim.SGD(params, lr=<required parameter>, momentum=0, dampening=0, weight_decay=0, nesterov=False)
+    """
+
+    # **Comment while runnin Adam**
+    print("Optimizer SGD") 
+    #optimizer = optim.SGD(classifier.parameters(), lr=cmd_args.learning_rate)
+    #optimizer = optim.SGD(classifier.parameters(), momentum=0.01, dampening=0, lr=cmd_args.learning_rate, nesterov=True) 
+    #optimizer = optim.SGD(classifier.parameters(), momentum=0.9, dampening=0, lr=cmd_args.learning_rate, nesterov=True) 
+    #optimizer = optim.SGD(classifier.parameters(), momentum=0.00001, dampening=0, lr=0.001, weight_decay=1e-6, nesterov=True) 
+    optimizer = optim.SGD(classifier.parameters(), momentum=0.9, dampening=0, lr=0.001, weight_decay=1e-6, nesterov=True) # same settings as article
+    
+    model__ = "_MPLClassifier_" #if not doing regression (also change boolean to true in next few lines    ---->   def __init__(self, regression=True):)
+    #model__ = "_MPLRegression_"
 
     train_idxes = list(range(len(train_graphs)))
     best_loss = None
     #Old: filename = cmd_args.data + '_acc_results.txt'
     testname = 'results/sample_plot' #CHANGE THIS LINE!!!
-    filename = testname + "_acc_results.txt" 
+    test_time = datetime.datetime.now()
+    filename = testname + model__ +"_acc_results.txt" 
+    
     #these vars hold loss/acc each epoch
     train_loss_per_epoch = []
     train_acc_per_epoch = []
     test_loss_per_epoch = []
     test_acc_per_epoch = []
     with open(filename, 'a+') as f:
+        # model__ is a gloval variable set a the top of this file and in the class inialization boolean       def __init__(self, regression=True):
+        if model__ == "_MPLRegression_": 
+            f.write('Classifier: ' + model__ + ', time ' + str(test_time) + ', Optimizer ' + str(optimizer))
+        else:
+            f.write('Classifier: ' + str(classifier) + ', time ' + str(test_time) + ', Optimizer ' + str(optimizer))
+
         for epoch in range(cmd_args.num_epochs):
             random.shuffle(train_idxes)
             classifier.train()
@@ -243,11 +312,15 @@ if __name__ == '__main__':
     
     #plot loss
     X = range(len(train_loss_per_epoch))
+    print(X)
     plt.plot(X, train_loss_per_epoch, label="train loss")
     plt.plot(X, test_loss_per_epoch, label="test loss")
     plt.title(testname + " loss curve")
     plt.legend()
-    plt.savefig(testname + "_loss.jpg")
+    if model__ ==  "_MPLRegression_": 
+        plt.savefig(testname + str(test_time) + model__ +  "_loss.jpg")
+    else:
+        plt.savefig(testname + str(test_time) + model__ +  "_loss.jpg")
     plt.show()
 
     #plot acc
@@ -255,7 +328,10 @@ if __name__ == '__main__':
     plt.plot(X, test_acc_per_epoch, label="test acc")
     plt.title(testname + " acc curve")
     plt.legend()
-    plt.savefig(testname + "_acc.jpg")
+    if model__ ==  "_MPLRegression_": 
+        plt.savefig(testname + str(test_time) + model__ + "_acc.jpg")
+    else:
+        plt.savefig(testname + str(test_time) + model__ + "_acc.jpg")
     plt.show()
 
 

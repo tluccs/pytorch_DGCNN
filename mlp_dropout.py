@@ -31,7 +31,11 @@ class MLPRegression(nn.Module):
         h1 = F.relu(h1)
 
         if self.with_dropout:
-            h1 = F.dropout(h1, training=self.training)
+            #add a parameter to try different percentages (for loop to try different percentages)
+            h1 = F.dropout(h1, training=self.training) # torch.nn.functional.dropout(input, p=0.5, training=True, inplace=False)
+            #print("***Dropout set to 70%")
+            #h1 = F.dropout(h1, p=0.7, training=self.training)
+            
         pred = self.h2_weights(h1)[:, 0]
 
         if y is not None:
@@ -57,7 +61,9 @@ class MLPClassifier(nn.Module):
         h1 = self.h1_weights(x)
         h1 = F.relu(h1)
         if self.with_dropout:
-            h1 = F.dropout(h1, training=self.training)
+            #h1 = F.dropout(h1, training=self.training)
+            print("Dropout set to 60%")
+            h1 = F.dropout(h1, p=0.6, training=self.training)
 
         logits = self.h2_weights(h1)
         logits = F.log_softmax(logits, dim=1)
