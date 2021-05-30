@@ -64,7 +64,7 @@ class MLPClassifier(nn.Module):
         h1 = F.relu(h1)
         if self.with_dropout:
             #h1 = F.dropout(h1, training=self.training)
-            print("Dropout set to {}".format(self.p))
+            #print("Dropout set to {}".format(self.p))
             h1 = F.dropout(h1, p=self.p, training=self.training)
 
         logits = self.h2_weights(h1)
