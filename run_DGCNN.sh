@@ -14,7 +14,7 @@ sortpooling_k=0.6  # If k <= 1, then k is set to an integer so that k% of graphs
 FP_LEN=0  # final dense layer's input dimension, decided by data
 n_hidden=128  # final dense layer's hidden size
 bsize=1  # batch size, set to 50 or 100 to accelerate training
-dropout=True
+dropout=0
 
 # dataset-specific settings
 case ${DATA} in

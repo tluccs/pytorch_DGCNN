@@ -28,7 +28,7 @@ cmd_opt.add_argument('-out_dim', type=int, default=1024, help='graph embedding o
 cmd_opt.add_argument('-hidden', type=int, default=100, help='dimension of mlp hidden layer')
 cmd_opt.add_argument('-max_lv', type=int, default=4, help='max rounds of message passing')
 cmd_opt.add_argument('-learning_rate', type=float, default=0.0001, help='init learning_rate')
-cmd_opt.add_argument('-dropout', type=bool, default=False, help='whether add dropout after dense layer')
+cmd_opt.add_argument('-dropout', type=float, default=0, help='dropout percent for MLP')
 cmd_opt.add_argument('-printAUC', type=bool, default=False, help='whether to print AUC (for binary classification only)')
 cmd_opt.add_argument('-extract_features', type=bool, default=False, help='whether to extract final graph features')
 

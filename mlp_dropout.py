@@ -17,12 +17,13 @@ sys.path.append('%s/lib' % os.path.dirname(os.path.realpath(__file__)))
 from pytorch_util import weights_init
 
 class MLPRegression(nn.Module):
-    def __init__(self, input_size, hidden_size, with_dropout=False):
+    def __init__(self, input_size, hidden_size, p=0):
         super(MLPRegression, self).__init__()
 
         self.h1_weights = nn.Linear(input_size, hidden_size)
         self.h2_weights = nn.Linear(hidden_size, 1)
-        self.with_dropout = with_dropout
+        self.with_dropout = (p == 0)
+        self.p = p
 
         weights_init(self)
 
@@ -31,7 +32,11 @@ class MLPRegression(nn.Module):
         h1 = F.relu(h1)
 
         if self.with_dropout:
-            h1 = F.dropout(h1, training=self.training)
+            #add a parameter to try different percentages (for loop to try different percentages)
+            h1 = F.dropout(h1, training=self.training, p=self.p) # torch.nn.functional.dropout(input, p=0.5, training=True, inplace=False)
+            #print("***Dropout set to 70%")
+            #h1 = F.dropout(h1, p=0.7, training=self.training)
+            
         pred = self.h2_weights(h1)[:, 0]
 
         if y is not None:
@@ -44,12 +49,13 @@ class MLPRegression(nn.Module):
             return pred
 
 class MLPClassifier(nn.Module):
-    def __init__(self, input_size, hidden_size, num_class, with_dropout=False):
+    def __init__(self, input_size, hidden_size, num_class, p=0):
         super(MLPClassifier, self).__init__()
 
         self.h1_weights = nn.Linear(input_size, hidden_size)
         self.h2_weights = nn.Linear(hidden_size, num_class)
-        self.with_dropout = with_dropout
+        self.with_dropout = (p == 0)
+        self.p = p
 
         weights_init(self)
 
@@ -57,7 +63,9 @@ class MLPClassifier(nn.Module):
         h1 = self.h1_weights(x)
         h1 = F.relu(h1)
         if self.with_dropout:
-            h1 = F.dropout(h1, training=self.training)
+            #h1 = F.dropout(h1, training=self.training)
+            print("Dropout set to {}".format(self.p))
+            h1 = F.dropout(h1, p=self.p, training=self.training)
 
         logits = self.h2_weights(h1)
         logits = F.log_softmax(logits, dim=1)
