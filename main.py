@@ -268,8 +268,8 @@ if __name__ == '__main__':
     #optimizer = optim.SGD(classifier.parameters(), momentum=0.00001, dampening=0, lr=0.001, weight_decay=1e-6, nesterov=True) 
     optimizer = optim.SGD(classifier.parameters(), momentum=0.9, dampening=0, lr=0.001, weight_decay=1e-6, nesterov=True) # same settings as article
     
-    model__ = "_MPLClassifier_" #if not doing regression (also change boolean to true in next few lines    ---->   def __init__(self, regression=True):)
-    #model__ = "_MPLRegression_"
+    model__ = "_MLPClassifier_" #if not doing regression (also change boolean to true in next few lines    ---->   def __init__(self, regression=True):)
+    #model__ = "_MLPRegression_"
 
     train_idxes = list(range(len(train_graphs)))
     best_loss = None
@@ -285,7 +285,7 @@ if __name__ == '__main__':
     test_acc_per_epoch = []
     with open(filename, 'a+') as f:
         # model__ is a gloval variable set a the top of this file and in the class inialization boolean       def __init__(self, regression=True):
-        if model__ == "_MPLRegression_": 
+        if model__ == "_MLPRegression_": 
             f.write('Classifier: ' + model__ + ', time ' + str(test_time) + ', Optimizer ' + str(optimizer))
         else:
             f.write('Classifier: ' + str(classifier) + ', time ' + str(test_time) + ', Optimizer ' + str(optimizer))
@@ -318,7 +318,8 @@ if __name__ == '__main__':
     plt.title(testname + " loss curve")
     plt.legend()
     plt.savefig(testname +  model__ +  "_loss.jpg")
-    plt.show()
+    #plt.show()
+    plt.close()
 
     #plot acc
     plt.plot(X, train_acc_per_epoch, label="train acc")
@@ -326,7 +327,8 @@ if __name__ == '__main__':
     plt.title(testname + " acc curve")
     plt.legend()
     plt.savefig(testname + model__ + "_acc.jpg")
-    plt.show()
+    #plt.show()
+    plt.close()
 
 
     if cmd_args.extract_features:

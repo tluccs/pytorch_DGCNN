@@ -16,6 +16,13 @@ FP_LEN=0  # final dense layer's input dimension, decided by data
 bsize=1  # batch size, set to 50 or 100 to accelerate training
 #dropout=0 
 
+###################################
+#GRID SEARCH ON DROPOUT AND HIDDEN DIM, ADD MORE HERE!!
+#Consider for loop over latent dim? Or other if needed see below
+dropout_tests="0 0.1"
+hidden_tests="128 256"
+###################################
+
 # dataset-specific settings
 case ${DATA} in
 MUTAG)
@@ -67,10 +74,7 @@ IMDBMULTI)
   ;;
 esac
 
-#GRID SEARCH ON DROPOUT AND HIDDEN DIM, ADD MORE HERE!!
-#Consider for loop over latent dim? 
-dropout_tests="0 0.1"
-hidden_tests="128 256"
+#grid search here. 
 for p in $dropout_tests 
 do 
   for h in $hidden_tests 
