@@ -251,90 +251,92 @@ if __name__ == '__main__':
         classifier = classifier.cuda()
     print("Classifier is " + str(Classifier))
 
-     
-    # **Comment while runnin SGD**
-    #optimizer = optim.Adam(classifier.parameters(), lr=cmd_args.learning_rate)
-    
     """
     Optimizer runs: results in \results\OptimizerResults        
     SGD signature torch.optim.SGD(params, lr=<required parameter>, momentum=0, dampening=0, weight_decay=0, nesterov=False)
     """
-
-    # **Comment while runnin Adam**
-    print("Optimizer SGD") 
-    #optimizer = optim.SGD(classifier.parameters(), lr=cmd_args.learning_rate)
-    #optimizer = optim.SGD(classifier.parameters(), momentum=0.01, dampening=0, lr=cmd_args.learning_rate, nesterov=True) 
-    #optimizer = optim.SGD(classifier.parameters(), momentum=0.9, dampening=0, lr=cmd_args.learning_rate, nesterov=True) 
-    #optimizer = optim.SGD(classifier.parameters(), momentum=0.00001, dampening=0, lr=0.001, weight_decay=1e-6, nesterov=True) 
-    optimizer = optim.SGD(classifier.parameters(), momentum=0.9, dampening=0, lr=0.001, weight_decay=1e-6, nesterov=True) # same settings as article
-    
     model__ = "_MLPClassifier_" #if not doing regression (also change boolean to true in next few lines    ---->   def __init__(self, regression=True):)
     #model__ = "_MLPRegression_"
 
-    train_idxes = list(range(len(train_graphs)))
-    best_loss = None
-    #Old: filename = cmd_args.data + '_acc_results.txt'
-    testname = 'results/p{}dim{}'.format(cmd_args.dropout, cmd_args.hidden) #CHANGE THIS LINE!!!
-    test_time = datetime.datetime.now() ####Windows does not like colons in file names >.< I can't git pull bc of it
-    filename = testname +"_acc_results.txt" 
+
+
+    opt_list = []
+     
     
-    #these vars hold loss/acc each epoch
-    train_loss_per_epoch = []
-    train_acc_per_epoch = []
-    test_loss_per_epoch = []
-    test_acc_per_epoch = []
-    with open(filename, 'a+') as f:
-        # model__ is a gloval variable set a the top of this file and in the class inialization boolean       def __init__(self, regression=True):
-        if model__ == "_MLPRegression_": 
-            f.write('Classifier: ' + model__ + ', time ' + str(test_time) + ', Optimizer ' + str(optimizer))
-        else:
-            f.write('Classifier: ' + str(classifier) + ', time ' + str(test_time) + ', Optimizer ' + str(optimizer))
-
-        for epoch in range(cmd_args.num_epochs):
-            random.shuffle(train_idxes)
-            classifier.train()
-            avg_loss = loop_dataset(train_graphs, classifier, train_idxes, optimizer=optimizer)
-            if not cmd_args.printAUC:
-                avg_loss[2] = 0.0
-            print('\033[92maverage training of epoch %d: loss %.5f acc %.5f auc %.5f\033[0m' % (epoch, avg_loss[0], avg_loss[1], avg_loss[2]))
-            f.write('average training of epoch {}: loss {:.5f} acc {:.5f} auc {:.5f}\n'.format(epoch, avg_loss[0], avg_loss[1], avg_loss[2]))
-
-            classifier.eval()
-            test_loss = loop_dataset(test_graphs, classifier, list(range(len(test_graphs))))
-            if not cmd_args.printAUC:
-                test_loss[2] = 0.0
-            print('\033[93maverage test of epoch %d: loss %.5f acc %.5f auc %.5f\033[0m' % (epoch, test_loss[0], test_loss[1], test_loss[2]))
-            f.write('average test of epoch {}: loss {:.5f} acc {:.5f} auc {:.5f}\n'.format(epoch, test_loss[0], test_loss[1], test_loss[2]))
-            train_loss_per_epoch.append(avg_loss[0])
-            train_acc_per_epoch.append(avg_loss[1])
-            test_loss_per_epoch.append(test_loss[0])
-            test_acc_per_epoch.append(test_loss[1])
+    opt_list.append(optim.Adam(classifier.parameters(), lr=cmd_args.learning_rate))
+    opt_list.append(optim.SGD(classifier.parameters(), momentum=0.9, dampening=0, lr=0.001, weight_decay=1e-6, nesterov=True)) # same settings as article
     
-    #plot loss
-    X = range(len(train_loss_per_epoch))
-    #print(X)
-    plt.plot(X, train_loss_per_epoch, label="train loss")
-    plt.plot(X, test_loss_per_epoch, label="test loss")
-    plt.title(testname + " loss curve")
-    plt.legend()
-    plt.savefig(testname +  model__ +  "_loss.jpg")
-    #plt.show()
-    plt.close()
+    
+    for k in range(len(opt_list)):
+        optimizer = opt_list[k]
 
-    #plot acc
-    plt.plot(X, train_acc_per_epoch, label="train acc")
-    plt.plot(X, test_acc_per_epoch, label="test acc")
-    plt.title(testname + " acc curve")
-    plt.legend()
-    plt.savefig(testname + model__ + "_acc.jpg")
-    #plt.show()
-    plt.close()
+        opt =  str(optimizer)
+        opt = opt[0:3:1]
+
+        train_idxes = list(range(len(train_graphs)))
+        best_loss = None
+        #Old: filename = cmd_args.data + '_acc_results.txt'
+        testname = 'results/p{}dim{}'.format(cmd_args.dropout, cmd_args.hidden) #CHANGE THIS LINE!!!
+        test_time = datetime.datetime.now() ####Windows does not like colons in file names >.< I can't git pull bc of it
+        filename = testname + opt +"_acc_results.txt" 
+        
+        #these vars hold loss/acc each epoch
+        train_loss_per_epoch = []
+        train_acc_per_epoch = []
+        test_loss_per_epoch = []
+        test_acc_per_epoch = []
+        with open(filename, 'a+') as f:
+            # model__ is a gloval variable set a the top of this file and in the class inialization boolean       def __init__(self, regression=True):
+            if model__ == "_MLPRegression_": 
+                f.write('Classifier: ' + model__ + ', time ' + str(test_time) + ', Optimizer ' + str(optimizer))
+            else:
+                f.write('Classifier: ' + str(classifier) + ', time ' + str(test_time) + ', Optimizer ' + str(optimizer))
+
+            for epoch in range(cmd_args.num_epochs):
+                random.shuffle(train_idxes)
+                classifier.train()
+                avg_loss = loop_dataset(train_graphs, classifier, train_idxes, optimizer=optimizer)
+                if not cmd_args.printAUC:
+                    avg_loss[2] = 0.0
+                print('\033[92maverage training of epoch %d: loss %.5f acc %.5f auc %.5f\033[0m' % (epoch, avg_loss[0], avg_loss[1], avg_loss[2]))
+                f.write('average training of epoch {}: loss {:.5f} acc {:.5f} auc {:.5f}\n'.format(epoch, avg_loss[0], avg_loss[1], avg_loss[2]))
+
+                classifier.eval()
+                test_loss = loop_dataset(test_graphs, classifier, list(range(len(test_graphs))))
+                if not cmd_args.printAUC:
+                    test_loss[2] = 0.0
+                print('\033[93maverage test of epoch %d: loss %.5f acc %.5f auc %.5f\033[0m' % (epoch, test_loss[0], test_loss[1], test_loss[2]))
+                f.write('average test of epoch {}: loss {:.5f} acc {:.5f} auc {:.5f}\n'.format(epoch, test_loss[0], test_loss[1], test_loss[2]))
+                train_loss_per_epoch.append(avg_loss[0])
+                train_acc_per_epoch.append(avg_loss[1])
+                test_loss_per_epoch.append(test_loss[0])
+                test_acc_per_epoch.append(test_loss[1])
+        
+        #plot loss
+        X = range(len(train_loss_per_epoch))
+        #print(X)
+        plt.plot(X, train_loss_per_epoch, label="train loss")
+        plt.plot(X, test_loss_per_epoch, label="test loss")
+        plt.title(testname + " loss curve")
+        plt.legend()
+        plt.savefig(testname +  model__ + opt +  "_loss.jpg")
+        #plt.show()
+        plt.close()
+
+        #plot acc
+        plt.plot(X, train_acc_per_epoch, label="train acc")
+        plt.plot(X, test_acc_per_epoch, label="test acc")
+        plt.title(testname + " acc curve")
+        plt.legend()
+        plt.savefig(testname + model__ + opt + "_acc.jpg")
+        #plt.show()
+        plt.close()
 
 
-    if cmd_args.extract_features:
-        features, labels = classifier.output_features(train_graphs)
-        labels = labels.type('torch.FloatTensor')
-        np.savetxt('extracted_features_train.txt', torch.cat([labels.unsqueeze(1), features.cpu()], dim=1).detach().numpy(), '%.4f')
-        features, labels = classifier.output_features(test_graphs)
-        labels = labels.type('torch.FloatTensor')
-        np.savetxt('extracted_features_test.txt', torch.cat([labels.unsqueeze(1), features.cpu()], dim=1).detach().numpy(), '%.4f')
+        if cmd_args.extract_features:
+            features, labels = classifier.output_features(train_graphs)
+            labels = labels.type('torch.FloatTensor')
+            np.savetxt('extracted_features_train.txt', torch.cat([labels.unsqueeze(1), features.cpu()], dim=1).detach().numpy(), '%.4f')
+            features, labels = classifier.output_features(test_graphs)
+            labels = labels.type('torch.FloatTensor')
+            np.savetxt('extracted_features_test.txt', torch.cat([labels.unsqueeze(1), features.cpu()], dim=1).detach().numpy(), '%.4f')
