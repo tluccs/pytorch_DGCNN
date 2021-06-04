@@ -1,4 +1,4 @@
-The old README is below. Special thanks to the DGCNN group and paper that our project was based on. 
+The old README is (modified) below. Special thanks to the DGCNN group and paper that our project was based on. 
 
 To run the code please see below. (Run make in lib/ and then you can run ./run_DGCNN.sh or ./grid_search.sh). The values in these 2 scripts are modified based on which experiment we are doing. We also name the experiment based on the variable in main.py "testname". For grid search, we use the parameters as the name. Otherwise, we write our own custom testname. To change the embedding, we can change sortpooling_k in the shell scripts or CONV_SIZE. And to add more layers to the CNN, we can uncomment the code  e.g. adding the the 1.5 layer in between layer 1 and 2. 
 
@@ -23,11 +23,18 @@ This implementation is based on Hanjun Dai's structure2vec graph backend. Under 
 
 to compile the necessary c++ files.
 
-After that, under the root directory of this repository, type
+-----------------------------------------------------------------------
+-----------------------------------------------------------------------
+For Data Mining Final Project CS247 results, Spring 2021:
 
-    ./run_DGCNN.sh
+Under the root directory of this repository, type
 
-to run DGCNN on dataset MUTAG with the default setting.
+    ./grid_search.sh
+
+to run DGCNN on the default dataset MUTAG and generate plots and results for the grid search on dropout, hidden layers, and optimizers.
+
+-----------------------------------------------------------------------
+-----------------------------------------------------------------------
 
 Or type 
 
