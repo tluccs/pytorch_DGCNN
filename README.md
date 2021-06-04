@@ -17,11 +17,18 @@ This implementation is based on Hanjun Dai's structure2vec graph backend. Under 
 
 to compile the necessary c++ files.
 
-After that, under the root directory of this repository, type
+-----------------------------------------------------------------------
+-----------------------------------------------------------------------
+For Data Mining Final Project CS247 results, Spring 2021:
 
-    ./run_DGCNN.sh
+Under the root directory of this repository, type
 
-to run DGCNN on dataset MUTAG with the default setting.
+    ./grid_search.sh
+
+to run DGCNN on the default dataset MUTAG and generate plots and results for the grid search on dropout, hidden layers, and optimizers.
+
+-----------------------------------------------------------------------
+-----------------------------------------------------------------------
 
 Or type 
 
