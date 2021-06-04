@@ -258,6 +258,13 @@ if __name__ == '__main__':
     model__ = "_MLPClassifier_" #if not doing regression (also change boolean to true in next few lines    ---->   def __init__(self, regression=True):)
     #model__ = "_MLPRegression_"
 
+    train_idxes = list(range(len(train_graphs)))
+    best_loss = None
+    #Old: filename = cmd_args.data + '_acc_results.txt'
+    #testname = 'results/p{}dim{}'.format(cmd_args.dropout, cmd_args.hidden) #CHANGE THIS LINE!!!
+    testname = 'results/lower_k'
+    test_time = datetime.datetime.now() ####Windows does not like colons in file names >.< I can't git pull bc of it
+    filename = testname +"_acc_results.txt" 
 
 
     opt_list = []
