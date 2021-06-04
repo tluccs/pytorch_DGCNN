@@ -1,3 +1,9 @@
+The old README is below. Special thanks to the DGCNN group and paper that our project was based on. 
+
+To run the code please see below. (Run make in lib/ and then you can run ./run_DGCNN.sh or ./grid_search.sh). The values in these 2 scripts are modified based on which experiment we are doing. We also name the experiment based on the variable in main.py "testname". For grid search, we use the parameters as the name. Otherwise, we write our own custom testname. To change the embedding, we can change sortpooling_k in the shell scripts or CONV_SIZE. And to add more layers to the CNN, we can uncomment the code  e.g. adding the the 1.5 layer in between layer 1 and 2. 
+
+We leave our important results in the results folder. See our grid search results and other named results that we used in our final report. 
+
 PyTorch DGCNN
 =============
 

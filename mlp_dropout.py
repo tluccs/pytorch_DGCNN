@@ -52,7 +52,9 @@ class MLPClassifier(nn.Module):
     def __init__(self, input_size, hidden_size, num_class, p=0):
         super(MLPClassifier, self).__init__()
 
+        print("INPUT SIZE: ", input_size)
         self.h1_weights = nn.Linear(input_size, hidden_size)
+        #self.h15_weights = nn.Linear(hidden_size, hidden_size)
         self.h2_weights = nn.Linear(hidden_size, num_class)
         self.with_dropout = (p == 0)
         self.p = p
@@ -66,6 +68,13 @@ class MLPClassifier(nn.Module):
             #h1 = F.dropout(h1, training=self.training)
             #print("Dropout set to {}".format(self.p))
             h1 = F.dropout(h1, p=self.p, training=self.training)
+
+        #h1 = self.h15_weights(h1)
+        #h1 = F.relu(h1)
+        #if self.with_dropout:
+            #h1 = F.dropout(h1, training=self.training)
+            #print("Dropout set to {}".format(self.p))
+        #    h1 = F.dropout(h1, p=self.p, training=self.training)
 
         logits = self.h2_weights(h1)
         logits = F.log_softmax(logits, dim=1)

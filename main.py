@@ -253,7 +253,7 @@ if __name__ == '__main__':
 
      
     # **Comment while runnin SGD**
-    #optimizer = optim.Adam(classifier.parameters(), lr=cmd_args.learning_rate)
+    optimizer = optim.Adam(classifier.parameters(), lr=cmd_args.learning_rate)
     
     """
     Optimizer runs: results in \results\OptimizerResults        
@@ -274,7 +274,8 @@ if __name__ == '__main__':
     train_idxes = list(range(len(train_graphs)))
     best_loss = None
     #Old: filename = cmd_args.data + '_acc_results.txt'
-    testname = 'results/p{}dim{}'.format(cmd_args.dropout, cmd_args.hidden) #CHANGE THIS LINE!!!
+    #testname = 'results/p{}dim{}'.format(cmd_args.dropout, cmd_args.hidden) #CHANGE THIS LINE!!!
+    testname = 'results/lower_k'
     test_time = datetime.datetime.now() ####Windows does not like colons in file names >.< I can't git pull bc of it
     filename = testname +"_acc_results.txt" 
     
@@ -318,7 +319,7 @@ if __name__ == '__main__':
     plt.title(testname + " loss curve")
     plt.legend()
     plt.savefig(testname +  model__ +  "_loss.jpg")
-    #plt.show()
+    plt.show()
     plt.close()
 
     #plot acc
@@ -327,7 +328,7 @@ if __name__ == '__main__':
     plt.title(testname + " acc curve")
     plt.legend()
     plt.savefig(testname + model__ + "_acc.jpg")
-    #plt.show()
+    plt.show()
     plt.close()
 
 
