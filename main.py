@@ -251,10 +251,7 @@ if __name__ == '__main__':
         classifier = classifier.cuda()
     print("Classifier is " + str(Classifier))
 
-    """
-    Optimizer runs: results in \results\OptimizerResults        
-    SGD signature torch.optim.SGD(params, lr=<required parameter>, momentum=0, dampening=0, weight_decay=0, nesterov=False)
-    """
+    
     model__ = "_MLPClassifier_" #if not doing regression (also change boolean to true in next few lines    ---->   def __init__(self, regression=True):)
     #model__ = "_MLPRegression_"
 
