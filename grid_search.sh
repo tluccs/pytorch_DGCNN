@@ -19,8 +19,8 @@ bsize=1  # batch size, set to 50 or 100 to accelerate training
 ###################################
 #GRID SEARCH ON DROPOUT AND HIDDEN DIM, ADD MORE HERE!!
 #Consider for loop over latent dim? Or other if needed see below
-dropout_tests="0 0.1"
-hidden_tests="128 256"
+dropout_tests="0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8"
+hidden_tests="128 200 256 300 400 500 512"
 ###################################
 
 # dataset-specific settings
